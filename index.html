@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Roblox Audio Processing Studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      background: #07080c;
+      color: #e2e8f0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 24px 14px;
+      background-image: 
+        radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.03) 0%, transparent 60%),
+        radial-gradient(circle at 100% 100%, rgba(59, 130, 246, 0.02) 0%, transparent 40%);
+    }
+
+    .container {
+      width: 100%;
+      max-width: 720px;
+    }
+
+    .card {
+      background: rgba(14, 16, 22, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      backdrop-filter: blur(20px);
+      padding: 28px;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
+    }
+
+    .header-title {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      background: linear-gradient(180deg, #ffffff 0%, #94a3b8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 20px;
+    }
+
+    /* SECTION TITLES */
+    .section-label {
+      font-size: 11px;
+      font-weight: 800;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* MULTI ACCOUNT MANAGER */
+    .accounts-grid {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      margin-bottom: 20px;
+    }
+
+    .account-card {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      background: rgba(8, 9, 13, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      min-width: 160px;
+    }
+
+    .account-card:hover {
+      border-color: rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .account-card.active {
+      border-color: #ffffff;
+      background: rgba(255, 255, 255, 0.08);
+      box-shadow: 0 0 12px rgba(255, 255, 255, 0.1);
+    }
+
+    .account-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: #181b24;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .account-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .account-name {
+      font-size: 12px;
+      font-weight: 700;
+      color: #f1f5f9;
+    }
+
+    .account-sub {
+      font-size: 10px;
+      color: #64748b;
+    }
+
+    /* FORM INPUTS */
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      color: #94a3b8;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+      letter-spacing: 0.04em;
+    }
+
+    input, select {
+      width: 100%;
+      background: rgba(8, 9, 13, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      padding: 11px 14px;
+      color: #fff;
+      font-size: 13px;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    input:focus, select:focus {
+      border-color: rgba(255, 255, 255, 0.3);
+      box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.05);
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    /* PREVIEW & CONTROLS */
+    .yt-preview {
+      display: none;
+      gap: 12px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 12px;
+      margin-top: 10px;
+      align-items: center;
+    }
+
+    .yt-preview img {
+      width: 80px;
+      height: 52px;
+      border-radius: 8px;
+      object-fit: cover;
+    }
+
+    .yt-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #f1f5f9;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 450px;
+    }
+
+    .range-box {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .range-box input[type="range"] {
+      flex: 1;
+    }
+
+    .lock-tag {
+      font-size: 10px;
+      font-weight: 800;
+      background: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      padding: 4px 8px;
+      border-radius: 6px;
+    }
+
+    /* QUEUE LIST */
+    .queue-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 28px;
+      margin-bottom: 14px;
+      padding-top: 18px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn {
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-primary {
+      background: #ffffff;
+      color: #08090d;
+    }
+
+    .btn-primary:hover {
+      background: #e2e8f0;
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: #cbd5e1;
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .btn-outline:hover {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .btn-danger {
+      background: rgba(239, 68, 68, 0.1);
+      color: #f87171;
+      border-color: rgba(239, 68, 68, 0.2);
+    }
+
+    .queue-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(8, 9, 13, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 10px;
+    }
+
+    .queue-item img {
+      width: 56px;
+      height: 56px;
+      border-radius: 8px;
+      object-fit: cover;
+    }
+
+    .queue-details {
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .queue-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #e2e8f0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .queue-status {
+      font-size: 11px;
+      color: #64748b;
+      font-family: monospace;
+      margin-top: 3px;
+    }
+
+    @media (max-width: 520px) {
+      .grid-2 { grid-template-columns: 1fr; }
+      .yt-title { max-width: 200px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="card">
+    <div class="header-title">Roblox Audio Studio</div>
+
+    <!-- SAVED ACCOUNTS / MULTI-ACCOUNT MANAGER -->
+    <div class="section-label">
+      <span>Tersimpan (Multi-Account)</span>
+      <span style="cursor: pointer; color: #3b82f6;" onclick="clearAccounts()">+ Reset Akun</span>
+    </div>
+
+    <div id="accountsList" class="accounts-grid">
+      <!-- Generated via JS -->
+    </div>
+
+    <!-- ACCOUNT FORM INPUT -->
+    <div class="grid-2 form-group">
+      <div>
+        <label>Account Label</label>
+        <input id="accLabel" type="text" placeholder="Misal: Main Acc / Group VIP">
+      </div>
+      <div>
+        <label>Open Cloud API Key</label>
+        <input id="apiKey" type="password" placeholder="Masukan Roblox API Key">
+      </div>
+    </div>
+
+    <div class="grid-2 form-group">
+      <div>
+        <label>Creator Type</label>
+        <select id="creatorType" onchange="updateAccountInfo()">
+          <option value="User">User Account</option>
+          <option value="Group">Group</option>
+        </select>
+      </div>
+      <div>
+        <label id="creatorLabel">User ID</label>
+        <input id="creatorId" type="text" placeholder="123456789">
+      </div>
+    </div>
+
+    <button class="btn btn-outline" style="width: 100%; margin-bottom: 20px;" onclick="saveAccount()">Simpan / Update Akun Ini</button>
+
+    <!-- YT LINK & AUDIO CONTROLS -->
+    <div class="section-label">Konfigurasi Audio</div>
+
+    <div class="form-group">
+      <label>YouTube Link</label>
+      <input id="ytUrl" type="text" placeholder="https://www.youtube.com/watch?v=..." onchange="fetchYtInfo()">
+      
+      <div id="ytPreview" class="yt-preview">
+        <img id="ytThumb" src="" alt="Thumb">
+        <div class="yt-info">
+          <div id="ytTitle" class="yt-title">Judul Video YouTube...</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2 form-group">
+      <div>
+        <label>Speed Adjust (<span id="speedVal">2.3</span>x) &rarr; In-Game: <span id="ingameSpeedVal">0.43</span></label>
+        <div class="range-box">
+          <input id="speed" type="range" min="0.5" max="3.0" step="0.1" value="2.3" oninput="updateSpeedPreview(this.value)">
+        </div>
+      </div>
+      <div>
+        <label>Max Cutoff Duration (Detik)</label>
+        <input id="duration" type="number" value="350" max="899" placeholder="Default: 350 Detik">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Volume Level</label>
+      <div class="range-box">
+        <input type="text" value="-4 dB (Fixed Output Normalization)" disabled>
+        <span class="lock-tag">LOCKED</span>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" style="width: 100%; margin-top: 10px;" onclick="processAudio()">Proses Audio & Masuk Antrean</button>
+
+    <!-- QUEUE LIST -->
+    <div class="queue-header">
+      <div style="font-weight: 700; font-size: 13px; text-transform: uppercase; color: #94a3b8;">Antrean Output</div>
+      <div class="btn-group">
+        <button class="btn btn-outline" onclick="copyAllIds()">Copy All IDs</button>
+        <button class="btn btn-primary" onclick="publishAll()">Publish All</button>
+      </div>
+    </div>
+
+    <div id="queueList">
+      <div style="text-align: center; color: #475569; font-size: 12px; padding: 24px;">Belum ada antrean audio.</div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // Ganti SERVER_URL dengan URL Web Service dari Render kamu
+  const SERVER_URL = "https://URL-RENDER-KAMU.onrender.com";
+
+  let accounts = JSON.parse(localStorage.getItem("roblox_audio_accounts") || "[]");
+  let activeAccIndex = -1;
+  let queue = [];
+
+  // INITIAL LOAD
+  renderAccounts();
+
+  function updateSpeedPreview(val) {
+    document.getElementById("speedVal").textContent = val;
+    const ingame = (1 / parseFloat(val)).toFixed(2);
+    document.getElementById("ingameSpeedVal").textContent = ingame;
+  }
+
+  function updateAccountInfo() {
+    const isGroup = document.getElementById("creatorType").value === "Group";
+    document.getElementById("creatorLabel").textContent = isGroup ? "Group ID" : "User ID";
+  }
+
+  async function saveAccount() {
+    const label = document.getElementById("accLabel").value.trim() || "Account";
+    const apiKey = document.getElementById("apiKey").value.trim();
+    const creatorType = document.getElementById("creatorType").value;
+    const creatorId = document.getElementById("creatorId").value.trim();
+
+    if (!apiKey || !creatorId) return alert("API Key dan Creator ID wajib diisi!");
+
+    // Fetch avatar icon dari Roblox API Proxy di server
+    let avatarUrl = "https://tr.rbxcdn.com/30day-avatar-headshot";
+    try {
+      const res = await fetch(`${SERVER_URL}/api/roblox-icon?type=${creatorType}&id=${creatorId}`);
+      const data = await res.json();
+      if (data.imageUrl) avatarUrl = data.imageUrl;
+    } catch(e) {}
+
+    const acc = { label, apiKey, creatorType, creatorId, avatarUrl };
+    
+    // Check if exists -> replace
+    const existingIdx = accounts.findIndex(a => a.creatorId === creatorId);
+    if (existingIdx >= 0) {
+      accounts[existingIdx] = acc;
+      activeAccIndex = existingIdx;
+    } else {
+      accounts.push(acc);
+      activeAccIndex = accounts.length - 1;
+    }
+
+    localStorage.setItem("roblox_audio_accounts", JSON.stringify(accounts));
+    renderAccounts();
+    alert("Akun berhasil disimpan!");
+  }
+
+  function selectAccount(index) {
+    activeAccIndex = index;
+    const acc = accounts[index];
+    document.getElementById("accLabel").value = acc.label;
+    document.getElementById("apiKey").value = acc.apiKey;
+    document.getElementById("creatorType").value = acc.creatorType;
+    document.getElementById("creatorId").value = acc.creatorId;
+    updateAccountInfo();
+    renderAccounts();
+  }
+
+  function clearAccounts() {
+    if (confirm("Hapus semua akun tersimpan?")) {
+      accounts = [];
+      localStorage.removeItem("roblox_audio_accounts");
+      renderAccounts();
+    }
+  }
+
+  function renderAccounts() {
+    const container = document.getElementById("accountsList");
+    if (accounts.length === 0) {
+      container.innerHTML = `<div style="font-size: 11px; color: #475569;">Belum ada akun tersimpan. Masukkan API Key di bawah lalu klik Simpan.</div>`;
+      return;
+    }
+
+    container.innerHTML = accounts.map((acc, idx) => `
+      <div class="account-card ${idx === activeAccIndex ? 'active' : ''}" onclick="selectAccount(${idx})">
+        <img class="account-avatar" src="${acc.avatarUrl}" alt="Avatar">
+        <div class="account-info">
+          <div class="account-name">${acc.label}</div>
+          <div class="account-sub">${acc.creatorType}: ${acc.creatorId}</div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  async function fetchYtInfo() {
+    const url = document.getElementById("ytUrl").value.trim();
+    if (!url) return;
+
+    try {
+      const res = await fetch(`${SERVER_URL}/api/yt-info`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url })
+      });
+      const data = await res.json();
+      if (data.thumbnail) {
+        document.getElementById("ytThumb").src = data.thumbnail;
+        document.getElementById("ytTitle").textContent = data.title;
+        document.getElementById("ytPreview").style.display = "flex";
+      }
+    } catch(e) {}
+  }
+
+  async function processAudio() {
+    const url = document.getElementById("ytUrl").value.trim();
+    const speed = document.getElementById("speed").value;
+    const duration = document.getElementById("duration").value;
+    const originalTitle = document.getElementById("ytTitle").textContent || "Roblox Audio Track";
+    const thumb = document.getElementById("ytThumb").src;
+
+    if (!url) return alert("Masukan URL YouTube!");
+
+    const ingameSpeed = (1 / parseFloat(speed)).toFixed(2);
+    const queueId = Date.now();
+    const item = { 
+      id: queueId, 
+      originalTitle, 
+      thumb, 
+      speed, 
+      ingameSpeed, 
+      status: "PROCESSING...", 
+      assetId: null, 
+      fileName: "" 
+    };
+
+    queue.push(item);
+    renderQueue();
+
+    try {
+      const res = await fetch(`${SERVER_URL}/api/process-audio`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url, speed, duration })
+      });
+      const data = await res.json();
+
+      if (data.fileName) {
+        item.fileName = data.fileName;
+        item.status = "READY TO PUBLISH";
+      } else {
+        item.status = "ERROR PROCESSING";
+      }
+    } catch (e) {
+      item.status = "FAILED";
+    }
+    renderQueue();
+  }
+
+  async function publishItem(id) {
+    const item = queue.find(x => x.id === id);
+    const apiKey = document.getElementById("apiKey").value.trim();
+    const creatorType = document.getElementById("creatorType").value;
+    const creatorId = document.getElementById("creatorId").value.trim();
+
+    if (!apiKey || !creatorId) return alert("Silakan pilih atau masukan API Key & Creator ID terlebih dahulu!");
+
+    item.status = "UPLOADING TO ROBLOX...";
+    renderQueue();
+
+    try {
+      const res = await fetch(`${SERVER_URL}/api/upload-roblox`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          apiKey, creatorType, creatorId,
+          title: item.originalTitle,
+          fileName: item.fileName
+        })
+      });
+
+      const data = await res.json();
+      if (data.assetId) {
+        item.assetId = data.assetId;
+        item.status = `PUBLISHED: ID ${data.assetId}`;
+      } else {
+        item.status = "UPLOAD ERROR";
+      }
+    } catch(e) {
+      item.status = "UPLOAD FAILED";
+    }
+    renderQueue();
+  }
+
+  async function publishAll() {
+    for (let item of queue) {
+      if (item.status === "READY TO PUBLISH") {
+        await publishItem(item.id);
+      }
+    }
+  }
+
+  function copyAllIds() {
+    const publishedItems = queue.filter(x => x.assetId);
+    if (publishedItems.length === 0) return alert("Belum ada asset yang sukses terbit!");
+
+    // Sesuai dengan format yang kamu minta untuk Module Script Roblox
+    const outputText = publishedItems.map(item => 
+      `Title : ${item.originalTitle}\nId : ${item.assetId}\nSpeed : ${item.ingameSpeed} --ingame`
+    ).join("\n\n");
+
+    navigator.clipboard.writeText(outputText);
+    alert("Format ModuleScript berhasil dicopy ke clipboard!\n\nHasil:\n\n" + outputText);
+  }
+
+  function renderQueue() {
+    const container = document.getElementById("queueList");
+    if (queue.length === 0) {
+      container.innerHTML = `<div style="text-align: center; color: #475569; font-size: 12px; padding: 24px;">Belum ada antrean audio.</div>`;
+      return;
+    }
+
+    container.innerHTML = queue.map(item => `
+      <div class="queue-item">
+        <img src="${item.thumb || 'https://via.placeholder.com/56'}" alt="Thumb">
+        <div class="queue-details">
+          <div class="queue-title">${item.originalTitle}</div>
+          <div class="queue-status">${item.status} | Speed: ${item.speed}x (In-Game: ${item.ingameSpeed})</div>
+        </div>
+        ${item.status === "READY TO PUBLISH" ? `<button class="btn btn-primary" onclick="publishItem(${item.id})">Publish</button>` : ''}
+      </div>
+    `).join('');
+  }
+</script>
+
+</body>
+</html>
