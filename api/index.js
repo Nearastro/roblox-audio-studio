@@ -15,6 +15,16 @@ app.use(express.json());
 
 const tmpDir = os.tmpdir();
 
+// 0. Route Halaman Utama (Serves index.html langsung dari Root Vercel)
+app.get("/", (req, res) => {
+  const htmlPath = path.join(__dirname, "../index.html");
+  if (fs.existsSync(htmlPath)) {
+    res.sendFile(htmlPath);
+  } else {
+    res.send("Roblox Audio Studio Backend Active. index.html tidak ditemukan di root.");
+  }
+});
+
 // 1. Fetch Info YT
 app.post("/api/yt-info", async (req, res) => {
   try {
@@ -88,7 +98,7 @@ app.post("/api/process-audio", async (req, res) => {
 
     if (fs.existsSync(rawPath)) fs.unlinkSync(rawPath);
 
-    // Read base64 / buffer
+    // Read base64
     const fileBuffer = fs.readFileSync(outputPath);
     const base64Audio = fileBuffer.toString("base64");
     if (fs.existsSync(outputPath)) fs.unlinkSync(outputPath);
