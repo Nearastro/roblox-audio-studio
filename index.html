@@ -52,7 +52,6 @@
       margin-bottom: 20px;
     }
 
-    /* SECTION TITLES */
     .section-label {
       font-size: 11px;
       font-weight: 800;
@@ -65,7 +64,6 @@
       justify-content: space-between;
     }
 
-    /* MULTI ACCOUNT MANAGER */
     .accounts-grid {
       display: flex;
       gap: 10px;
@@ -124,7 +122,6 @@
       color: #64748b;
     }
 
-    /* FORM INPUTS */
     .form-group {
       margin-bottom: 16px;
     }
@@ -162,7 +159,6 @@
       gap: 12px;
     }
 
-    /* PREVIEW & CONTROLS */
     .yt-preview {
       display: none;
       gap: 12px;
@@ -211,7 +207,6 @@
       border-radius: 6px;
     }
 
-    /* QUEUE LIST */
     .queue-header {
       display: flex;
       justify-content: space-between;
@@ -258,12 +253,6 @@
     .btn-outline:hover {
       background: rgba(255, 255, 255, 0.05);
       border-color: rgba(255, 255, 255, 0.3);
-    }
-
-    .btn-danger {
-      background: rgba(239, 68, 68, 0.1);
-      color: #f87171;
-      border-color: rgba(239, 68, 68, 0.2);
     }
 
     .queue-item {
@@ -317,17 +306,13 @@
   <div class="card">
     <div class="header-title">Roblox Audio Studio</div>
 
-    <!-- SAVED ACCOUNTS / MULTI-ACCOUNT MANAGER -->
     <div class="section-label">
       <span>Tersimpan (Multi-Account)</span>
       <span style="cursor: pointer; color: #3b82f6;" onclick="clearAccounts()">+ Reset Akun</span>
     </div>
 
-    <div id="accountsList" class="accounts-grid">
-      <!-- Generated via JS -->
-    </div>
+    <div id="accountsList" class="accounts-grid"></div>
 
-    <!-- ACCOUNT FORM INPUT -->
     <div class="grid-2 form-group">
       <div>
         <label>Account Label</label>
@@ -355,7 +340,6 @@
 
     <button class="btn btn-outline" style="width: 100%; margin-bottom: 20px;" onclick="saveAccount()">Simpan / Update Akun Ini</button>
 
-    <!-- YT LINK & AUDIO CONTROLS -->
     <div class="section-label">Konfigurasi Audio</div>
 
     <div class="form-group">
@@ -393,7 +377,6 @@
 
     <button class="btn btn-primary" style="width: 100%; margin-top: 10px;" onclick="processAudio()">Proses Audio & Masuk Antrean</button>
 
-    <!-- QUEUE LIST -->
     <div class="queue-header">
       <div style="font-weight: 700; font-size: 13px; text-transform: uppercase; color: #94a3b8;">Antrean Output</div>
       <div class="btn-group">
@@ -410,14 +393,13 @@
 </div>
 
 <script>
-  // Ganti SERVER_URL dengan URL Web Service dari Render kamu
-  const SERVER_URL = "https://URL-RENDER-KAMU.onrender.com";
+  // Menggunakan string kosong karena frontend & backend disajikan di domain Vercel yang sama
+  const SERVER_URL = "";
 
   let accounts = JSON.parse(localStorage.getItem("roblox_audio_accounts") || "[]");
   let activeAccIndex = -1;
   let queue = [];
 
-  // INITIAL LOAD
   renderAccounts();
 
   function updateSpeedPreview(val) {
@@ -439,7 +421,6 @@
 
     if (!apiKey || !creatorId) return alert("API Key dan Creator ID wajib diisi!");
 
-    // Fetch avatar icon dari Roblox API Proxy di server
     let avatarUrl = "https://tr.rbxcdn.com/30day-avatar-headshot";
     try {
       const res = await fetch(`${SERVER_URL}/api/roblox-icon?type=${creatorType}&id=${creatorId}`);
@@ -448,8 +429,6 @@
     } catch(e) {}
 
     const acc = { label, apiKey, creatorType, creatorId, avatarUrl };
-    
-    // Check if exists -> replace
     const existingIdx = accounts.findIndex(a => a.creatorId === creatorId);
     if (existingIdx >= 0) {
       accounts[existingIdx] = acc;
@@ -539,7 +518,7 @@
       ingameSpeed, 
       status: "PROCESSING...", 
       assetId: null, 
-      fileName: "" 
+      base64Data: "" 
     };
 
     queue.push(item);
@@ -553,8 +532,8 @@
       });
       const data = await res.json();
 
-      if (data.fileName) {
-        item.fileName = data.fileName;
+      if (data.base64Data) {
+        item.base64Data = data.base64Data;
         item.status = "READY TO PUBLISH";
       } else {
         item.status = "ERROR PROCESSING";
@@ -583,7 +562,7 @@
         body: JSON.stringify({
           apiKey, creatorType, creatorId,
           title: item.originalTitle,
-          fileName: item.fileName
+          base64Data: item.base64Data
         })
       });
 
@@ -612,13 +591,12 @@
     const publishedItems = queue.filter(x => x.assetId);
     if (publishedItems.length === 0) return alert("Belum ada asset yang sukses terbit!");
 
-    // Sesuai dengan format yang kamu minta untuk Module Script Roblox
     const outputText = publishedItems.map(item => 
       `Title : ${item.originalTitle}\nId : ${item.assetId}\nSpeed : ${item.ingameSpeed} --ingame`
     ).join("\n\n");
 
     navigator.clipboard.writeText(outputText);
-    alert("Format ModuleScript berhasil dicopy ke clipboard!\n\nHasil:\n\n" + outputText);
+    alert("Format ModuleScript berhasil dicopy ke clipboard!");
   }
 
   function renderQueue() {
